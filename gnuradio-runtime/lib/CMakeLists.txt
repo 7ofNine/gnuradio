@@ -185,7 +185,10 @@ endif()
 # Add controlport stuff to gnuradio-runtime
 ########################################################################
 # Controlport
-if(ENABLE_GR_CTRLPORT)
+#
+# %GUT: has to be enabled for gnuradio-runtime   to compile. Unclean setup here!
+# needs clarification. Don't know yet why this would be necessary
+if(ENABLE_GR_CTRLPORT)        
 
 # Keep track of the number of backends ControlPort supports
 SET(CTRLPORT_BACKENDS 0)

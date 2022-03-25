@@ -48,7 +48,7 @@ void thread_bind_to_processor(gr_thread_t thread, const std::vector<int>& mask)
     std::vector<int> _mask = mask;
     std::vector<int>::iterator itr;
     for (itr = _mask.begin(); itr != _mask.end(); itr++)
-        dword_mask |= (1 << (*itr));
+        dword_mask |= (1LL << (*itr));
 
     DWORD_PTR ret = SetThreadAffinityMask(thread, dword_mask);
     if (ret == 0) {

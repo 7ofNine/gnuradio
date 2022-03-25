@@ -16,6 +16,8 @@ add_library(gnuradio-pmt
 target_link_libraries(gnuradio-pmt
   Boost::boost
   Boost::thread
+  Boost::dynamic_linking
+  Boost::disable_autolinking
   spdlog::spdlog
   Volk::volk
 )
