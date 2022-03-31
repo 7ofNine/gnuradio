@@ -56,6 +56,12 @@ GR_PYTHON_CHECK_MODULE_RAW(
     NUMPY_FOUND
 )
 
+GR_PYTHON_CHECK_MODULE_RAW(
+  "jsonschema"
+  "import jsonschema"
+  JSONSCHEMA_FOUND
+)
+
 ########################################################################
 # Register component
 ########################################################################
@@ -80,6 +86,11 @@ GR_REGISTER_COMPONENT("gnuradio-companion" ENABLE_GRC
 
 if(ENABLE_GRC)
 
+  GR_REGISTER_COMPONENT("JSON/YAML config blocks" ENABLE_JSONYAML_BLOCKS
+    ENABLE_GRC
+    JSONSCHEMA_FOUND
+    )
+
 ########################################################################
 # Create and install the grc and grc-docs conf file
 ########################################################################
@@ -91,12 +102,12 @@ endif(CMAKE_INSTALL_PREFIX STREQUAL "/usr")
 
 if(UNIX)
     find_program(GRC_XTERM_EXE
-        NAMES xterminal-emulator gnome-terminal konsole xterm
+        NAMES x-terminal-emulator gnome-terminal konsole xterm foot
         HINTS ENV PATH
         DOC "graphical terminal emulator used in GRC's no-gui-mode"
     )
     if(NOT GRC_XTERM_EXE)
-        set(GRC_XTERM_EXE "")
+        set(GRC_XTERM_EXE "x-terminal-emulator")
     endif()
 else()  # APPLE CYGWIN
     set(GRC_XTERM_EXE "xterm")
