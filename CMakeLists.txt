@@ -328,7 +328,10 @@ ENDIF(UNIX)
 ########################################################################
 # Disable complex math NaN/INFO range checking for performance
 ########################################################################
+include(CheckCXXCompilerFlag)
+message(STATUS "-------check cxx compiler flag")
 check_cxx_compiler_flag(-fcx-limited-range HAVE_CX_LIMITED_RANGE)
+message(STATUS "-------check cxx compiler flag executed")
 if(HAVE_CX_LIMITED_RANGE)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fcx-limited-range")
 endif(HAVE_CX_LIMITED_RANGE)
