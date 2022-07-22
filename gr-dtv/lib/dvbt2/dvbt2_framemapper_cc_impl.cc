@@ -938,7 +938,7 @@ void dvbt2_framemapper_cc_impl::forecast(int noutput_items,
 
 int dvbt2_framemapper_cc_impl::add_crc32_bits(unsigned char* in, int length)
 {
-    int crc = 0xffffffff;
+    unsigned int crc = 0xffffffff;
     int b;
     int i = 0;
 
@@ -1016,7 +1016,7 @@ void dvbt2_framemapper_cc_impl::bch_poly_build_tables(void)
     const int polys12[] = { 1, 1, 1, 1, 0, 1, 1, 1, 1, 0, 1, 0, 0, 1, 1 };
 
     int len;
-    int polyout[2][200];
+    int polyout[2][200] = {};
 
     len = poly_mult(polys01, 15, polys02, 15, polyout[0]);
     len = poly_mult(polys03, 15, polyout[0], len, polyout[1]);

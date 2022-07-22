@@ -16,6 +16,8 @@ install(FILES
     and_const.h
     api.h
     argmax.h
+    blockinterleaver_xx.h
+    blockinterleaving.h
     control_loop.h
     correctiq.h
     correctiq_auto.h
@@ -24,6 +26,7 @@ install(FILES
     count_bits.h
     divide.h
     file_sink_base.h
+    host_buffer_copy.h
     integrate.h
     lfsr_15_1_0.h
     lfsr_32k.h

@@ -25,6 +25,7 @@ list(APPEND blocks_python_files
     annotator_alltoall_python.cc
     annotator_raw_python.cc
     argmax_python.cc
+    blockinterleaver_xx_python.cc
     burst_tagger_python.cc
     char_to_float_python.cc
     char_to_short_python.cc
@@ -70,6 +71,7 @@ list(APPEND blocks_python_files
     float_to_short_python.cc
     float_to_uchar_python.cc
     head_python.cc
+    host_buffer_copy_python.cc
     int_to_float_python.cc
     integrate_python.cc
     interleave_python.cc

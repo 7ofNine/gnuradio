@@ -39,8 +39,6 @@ endif(MSVC)
 
 target_link_libraries(gnuradio-pdu PUBLIC
     gnuradio-runtime
-    gnuradio-blocks
-    gnuradio-filter
 )
 
 if(ENABLE_COMMON_PCH)
@@ -52,11 +50,6 @@ target_include_directories(gnuradio-pdu
   PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
   )
 
-
-# we need -no-as-needed or else -lgslcblas gets stripped out on newer version of gcc
-if(CMAKE_COMPILER_IS_GNUCC AND NOT APPLE)
-    SET_TARGET_PROPERTIES(gnuradio-pdu PROPERTIES LINK_FLAGS "-Wl,--no-as-needed")
-endif()
 
 if(BUILD_SHARED_LIBS)
   GR_LIBRARY_FOO(gnuradio-pdu)

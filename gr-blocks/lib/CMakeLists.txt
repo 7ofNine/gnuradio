@@ -11,6 +11,12 @@
 include(GrMiscUtils)
 GR_CHECK_HDR_N_DEF(io.h HAVE_IO_H)
 
+if(SNDFILE_FOUND)
+    if(NOT PC_SNDFILE_VERSION VERSION_LESS 1.0.29)
+        add_definitions(-DHAVE_SF_FORMAT_OPUS)
+    endif()
+endif()
+
 ########################################################################
 # Setup library
 ########################################################################
@@ -21,6 +27,8 @@ set(BLOCKS_SOURCES
     and_blk_impl.cc
     and_const_impl.cc
     argmax_impl.cc
+    blockinterleaver_xx_impl.cc
+    blockinterleaving.cc
     correctiq_auto_impl.cc
     correctiq_impl.cc
     correctiq_man_impl.cc
@@ -96,6 +104,7 @@ set(BLOCKS_SOURCES
     float_array_to_uchar.cc
     float_to_uchar_impl.cc
     head_impl.cc
+    host_buffer_copy_impl.cc
     int_to_float_impl.cc
     interleave_impl.cc
     interleaved_short_to_complex_impl.cc
