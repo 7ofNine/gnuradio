@@ -13,6 +13,9 @@
 
 #include <gnuradio/blocks/api.h>
 
+#include <vector>
+
+
 
 namespace gr {
 namespace blocks {

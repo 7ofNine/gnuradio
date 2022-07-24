@@ -25,6 +25,18 @@ else (PYTHON_EXECUTABLE)
 endif (PYTHON_EXECUTABLE)
 
 find_package(PythonLibs ${PYTHON_VERSION_MAJOR}.${PYTHON_VERSION_MINOR} EXACT)
+#string(REGEX REPLACE "debug;" "debug" PYTHON_LIBRARIES ${PYTHON_LIBRARIES})
+list(GET PYTHON_LIBRARIES  1 PART1)
+list(GET PYTHON_LIBRARIES  3 PART2)
+list(JOIN PART1 "" SEG1)
+list(JOIN PART2 "" SEG2)
+set(PYTHON_LIBRARIES ${SEG1} ${SEG2})
+#message(STATUS "----------------------------- PART1 : ${PART1}")
+#message(STATUS "----------------------------- PART2 : ${PART2}")
+#message(STATUS "----------------------------- SEG1  : ${SEG1}")
+#message(STATUS "----------------------------- SEG2  : ${SEG2}")
+#message(STATUS "----------------------------- _LIBS : ${PYTHON_LIBRARIES}")
+#message(STATUS "-----------------------------Trace 1: ${PYTHON_LIBRARIES}")
 
 if (CMAKE_CROSSCOMPILING)
     set(QA_PYTHON_EXECUTABLE "/usr/bin/python3")
@@ -40,6 +52,7 @@ add_library(Python::Python INTERFACE IMPORTED)
 # Need to handle special cases where both debug and release
 # libraries are available (in form of debug;A;optimized;B) in PYTHON_LIBRARIES
 if(PYTHON_LIBRARY_DEBUG AND PYTHON_LIBRARY_RELEASE)
+    message(STATUS "Python Libraries ${PYTHON_LIBRARIES}")
     set_target_properties(Python::Python PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${PYTHON_INCLUDE_DIRS}"
       INTERFACE_LINK_LIBRARIES "$<$<NOT:$<CONFIG:Debug>>:${PYTHON_LIBRARY_RELEASE}>;$<$<CONFIG:Debug>:${PYTHON_LIBRARY_DEBUG}>"
