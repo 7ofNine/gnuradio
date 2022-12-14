@@ -87,7 +87,7 @@ class test_fecapi_ldpc(gr_unittest.TestCase):
 
         self.assertEqual(data_in, data_out)
 
-    def test_parallelism0_03(self):
+    def test_parallelism0_03_gen(self):
         filename = LDPC_ALIST_DIR + "n_0100_k_0058_gen_matrix.alist"
         gap = 4
         LDPC_matrix_object = fec.ldpc_G_matrix(filename)
@@ -105,7 +105,7 @@ class test_fecapi_ldpc(gr_unittest.TestCase):
 
         self.assertEqual(data_in, data_out)
 
-    def test_parallelism0_03(self):
+    def test_parallelism0_03_par(self):
         filename = LDPC_ALIST_DIR + "n_0100_k_0058_gen_matrix.alist"
         gap = 4
         k = 100 - 58
@@ -267,25 +267,6 @@ class test_fecapi_ldpc(gr_unittest.TestCase):
             AttributeError,
             lambda: extended_decoder(
                 dec,
-                threading=threading,
-                puncpat="11"))
-
-    def test_parallelism2_00(self):
-        filename = LDPC_ALIST_DIR + "n_0100_k_0027_gap_04.alist"
-        gap = 4
-        dims = 5
-        LDPC_matrix_object = fec.ldpc_H_matrix(filename, gap)
-        k = LDPC_matrix_object.k()
-        dims1 = 16
-        dims2 = 16
-        enc = list(map((lambda b: list(map((lambda a: fec.ldpc_par_mtrx_encoder.make_H(
-            LDPC_matrix_object)), list(range(0, dims1))))), list(range(0, dims2))))
-        threading = 'capillary'
-
-        self.assertRaises(
-            AttributeError,
-            lambda: extended_encoder(
-                enc,
                 threading=threading,
                 puncpat="11"))
 

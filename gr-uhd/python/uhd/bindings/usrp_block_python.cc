@@ -25,8 +25,6 @@ void bind_usrp_block(py::module& m)
     m.attr("ALL_MBOARDS") = py::int_(::uhd::usrp::multi_usrp::ALL_MBOARDS);
     m.attr("ALL_LOS") = py::str(::uhd::usrp::multi_usrp::ALL_LOS);
 
-    m.def("find", [](const uhd::device_addr_t& hint) { return uhd::device::find(hint); });
-
     py::class_<usrp_block,
                gr::sync_block,
                gr::block,
@@ -93,7 +91,7 @@ void bind_usrp_block(py::module& m)
 
 
         .def("set_gain",
-             (void (usrp_block::*)(double, size_t, pmt::pmt_t)) & usrp_block::set_gain,
+             (void(usrp_block::*)(double, size_t, pmt::pmt_t)) & usrp_block::set_gain,
              py::arg("gain"),
              py::arg("chan") = 0,
              py::arg("direction") = pmt::PMT_NIL,
@@ -101,7 +99,7 @@ void bind_usrp_block(py::module& m)
 
 
         .def("set_gain",
-             (void (usrp_block::*)(double, std::string const&, size_t)) &
+             (void(usrp_block::*)(double, std::string const&, size_t)) &
                  usrp_block::set_gain,
              py::arg("gain"),
              py::arg("name"),
@@ -117,13 +115,13 @@ void bind_usrp_block(py::module& m)
 
 
         .def("get_gain",
-             (double (usrp_block::*)(size_t)) & usrp_block::get_gain,
+             (double(usrp_block::*)(size_t)) & usrp_block::get_gain,
              py::arg("chan") = 0,
              D(usrp_block, get_gain, 0))
 
 
         .def("get_gain",
-             (double (usrp_block::*)(std::string const&, size_t)) & usrp_block::get_gain,
+             (double(usrp_block::*)(std::string const&, size_t)) & usrp_block::get_gain,
              py::arg("name"),
              py::arg("chan") = 0,
              D(usrp_block, get_gain, 1))

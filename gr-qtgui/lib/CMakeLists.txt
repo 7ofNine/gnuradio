@@ -9,8 +9,7 @@
 # Setup the QT file generations stuff
 ########################################################################
 
-add_library(
-    gnuradio-qtgui
+set(QTGUI_SOURCES
     DisplayPlot.cc
     FrequencyDisplayPlot.cc
     EyeDisplayPlot.cc
@@ -59,34 +58,39 @@ add_library(
     ber_sink_b_impl.cc
     vectordisplayform.cc
     vector_sink_f_impl.cc
-    edit_box_msg_impl.cc)
-target_compile_definitions(gnuradio-qtgui PRIVATE -DQWT_DLL) #setup QWT library linkage
+    edit_box_msg_impl.cc
+)
+
+set(QTGUI_LIBS
+    gnuradio-runtime
+    gnuradio-fft
+    gnuradio-filter
+    Volk::volk
+    qwt::qwt
+    Qt5::Widgets
+)
+
+if(ENABLE_COMMON_PCH)
+    set(PRIVATE_LIBS common-precompiled-headers)
+endif()
+
+
+add_library(
+    gnuradio-qtgui
+    ${QTGUI_SOURCES}
+)
+
+# Set up QWT library linkage:
+target_compile_definitions(gnuradio-qtgui PRIVATE -DQWT_DLL)
 target_include_directories(
     gnuradio-qtgui
     PUBLIC $<INSTALL_INTERFACE:include>
            $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../include>
     PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
-target_link_libraries(gnuradio-qtgui PUBLIC gnuradio-runtime gnuradio-fft gnuradio-filter
-                                            Volk::volk qwt::qwt Qt5::Widgets)
-if(WIN32)
-    target_link_libraries(gnuradio-qtgui PUBLIC dwrite)
-endif(WIN32)
-
-if(ENABLE_COMMON_PCH)
-    target_link_libraries(gnuradio-qtgui PRIVATE common-precompiled-headers)
-endif()
-
-include(GrPython)
-if(ENABLE_PYTHON)
-    target_compile_definitions(gnuradio-qtgui PUBLIC -DENABLE_PYTHON)
-    # INTERFACE/PRIVATE split so users of the library can choose how to link to Python
-    # (importantly, extension modules can avoid linking against Python and resolve
-    #  their own Python symbols at runtime through the Python interpreter's linking)
-    target_link_libraries(
-        gnuradio-qtgui
-        INTERFACE Python::Module
-        PRIVATE Python::Python)
-endif(ENABLE_PYTHON)
+target_link_libraries(gnuradio-qtgui
+    PUBLIC ${QTGUI_LIBS}
+    PRIVATE ${PRIVATE_LIBS}
+)
 
 set(qtgui_mod_includedir ${CMAKE_CURRENT_SOURCE_DIR}/../include/gnuradio/qtgui)
 qt5_wrap_cpp(
@@ -139,5 +143,5 @@ if(MSVC)
 endif(MSVC)
 
 if(BUILD_SHARED_LIBS)
-    gr_library_foo(gnuradio-qtgui Qwt Qt5Widgets FFTW3f)
+    gr_library_foo(gnuradio-qtgui Qwt Qt5Widgets)
 endif()

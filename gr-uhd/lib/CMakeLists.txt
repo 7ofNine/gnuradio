@@ -19,6 +19,9 @@ if(ENABLE_UHD_RFNOC)
         rfnoc_block_generic_impl.cc
         rfnoc_ddc_impl.cc
         rfnoc_duc_impl.cc
+        rfnoc_siggen_impl.cc
+        rfnoc_window_impl.cc
+        rfnoc_fir_filter_impl.cc
         rfnoc_graph_impl.cc
         rfnoc_rx_radio_impl.cc
         rfnoc_rx_streamer_impl.cc
@@ -28,7 +31,7 @@ endif(ENABLE_UHD_RFNOC)
 
 add_library(gnuradio-uhd ${LIB_GR_UHD_SOURCES})
 
-target_link_libraries(gnuradio-uhd gnuradio-runtime UHD::UHD)
+target_link_libraries(gnuradio-uhd PUBLIC gnuradio-runtime UHD::UHD)
 
 target_include_directories(
     gnuradio-uhd PUBLIC $<INSTALL_INTERFACE:include>

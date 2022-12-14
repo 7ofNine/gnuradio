@@ -1,6 +1,7 @@
 /* -*- c++ -*- */
 /*
  * Copyright 2020 Free Software Foundation, Inc.
+ * Copyright 2020 Ettus Research, A National Instruments Brand.
  *
  * SPDX-License-Identifier: GPL-3.0-or-later
  */
@@ -28,10 +29,19 @@ rfnoc_block::make_block_ref(rfnoc_graph::sptr graph,
     const std::string block_id =
         graph->get_block_id(block_name, device_select, block_select);
     if (block_id.empty()) {
-        throw std::runtime_error("Cannot find block!");
+        throw std::runtime_error(
+            fmt::format("Cannot find block with ID: {:s} Device/Instance: {:d}/{:d}",
+                        block_name,
+                        device_select,
+                        block_select));
     }
 
-    return graph->get_block_ref(block_id, max_ref_count);
+    auto block = graph->get_block_ref(block_id, max_ref_count);
+    if (block) {
+        block->set_properties(block_args, 0);
+    }
+
+    return block;
 }
 
 rfnoc_block::rfnoc_block(::uhd::rfnoc::noc_block_base::sptr block_ref)
@@ -56,6 +66,11 @@ int rfnoc_block::general_work(int /*noutput_items*/,
     // We should never land here
     throw std::runtime_error("Unexpected call to general_work() in an RFNoC block!");
     return 0;
+}
+
+std::vector<std::string> rfnoc_block::get_property_ids()
+{
+    return d_block_ref->get_property_ids();
 }
 
 } /* namespace uhd */

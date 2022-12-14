@@ -55,6 +55,7 @@ add_library(
     buffer_reader.cc
     buffer_reader_sm.cc
     buffer_single_mapped.cc
+    dictionary_logger_backend.cc
     flat_flowgraph.cc
     flowgraph.cc
     hier_block2.cc
@@ -94,10 +95,6 @@ add_library(
     vmcircbuf_prefs.cc
     vmcircbuf_sysv_shm.cc)
 
-if(ENABLE_PYTHON)
-    target_sources(gnuradio-runtime PRIVATE block_gateway_impl.cc)
-endif()
-
 # Messages
 target_sources(
     gnuradio-runtime
@@ -126,21 +123,12 @@ target_link_libraries(
     PUBLIC
         gnuradio-pmt
         Volk::volk
-        Boost::program_options
         Boost::thread
         spdlog::spdlog
         MPLib::mplib
-        # INTERFACE/PRIVATE split so users of the library can choose how to link to Python
-        # (importantly, extension modules can avoid linking against Python and resolve
-        #  their own Python symbols at runtime through the Python interpreter's linking)
-    PRIVATE libunwind::libunwind)
-
-if(ENABLE_PYTHON)
-    target_link_libraries(
-        gnuradio-runtime
-        INTERFACE Python::Module
-        PRIVATE Python::Python pybind11::pybind11)
-endif()
+    PRIVATE
+        Boost::program_options
+        libunwind::libunwind)
 
 # Address linker issues with std::filesystem on Centos 8 and Debian
 target_link_libraries(
@@ -338,6 +326,7 @@ if(ENABLE_TESTING)
         qa_buffer.cc
         qa_io_signature.cc
         qa_logger.cc
+        qa_dictionary_logger.cc
         qa_host_buffer.cc
         qa_vmcircbuf.cc)
     list(APPEND GR_TEST_TARGET_DEPS gnuradio-runtime gnuradio-pmt)
