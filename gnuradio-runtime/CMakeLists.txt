@@ -17,7 +17,7 @@ find_package(MPLIB)
 # Setup compatibility checks and defines
 ########################################################################
 include(${CMAKE_CURRENT_SOURCE_DIR}/ConfigChecks.cmake)
-GR_CHECK_LINUX_SCHED_AVAIL()
+gr_check_linux_sched_avail()
 
 ########################################################################
 # Find spdlog
@@ -29,27 +29,27 @@ find_package(spdlog CONFIG)
 ########################################################################
 include(GrComponent)
 if (ENABLE_PYTHON)
-GR_REGISTER_COMPONENT("gnuradio-runtime" ENABLE_GNURADIO_RUNTIME
+    gr_register_component(
+        "gnuradio-runtime"
+        ENABLE_GNURADIO_RUNTIME
     Boost_FOUND
     PYTHONINTERP_FOUND
     MPLIB_FOUND
     spdlog_FOUND
     pybind11_FOUND
-    Volk_FOUND
-)
+        Volk_FOUND)
 else()
-GR_REGISTER_COMPONENT("gnuradio-runtime" ENABLE_GNURADIO_RUNTIME
+    gr_register_component(
+        "gnuradio-runtime"
+        ENABLE_GNURADIO_RUNTIME
     Boost_FOUND
     PYTHONINTERP_FOUND
     MPLIB_FOUND
     spdlog_FOUND
-    Volk_FOUND
-)
+        Volk_FOUND)
 endif()
 
-get_filename_component(GNURADIO_RUNTIME_PYTHONPATH
-    ${CMAKE_SOURCE_DIR}/python ABSOLUTE
-)
+get_filename_component(GNURADIO_RUNTIME_PYTHONPATH ${PROJECT_SOURCE_DIR}/python ABSOLUTE)
 ########################################################################
 # Setup precompiled header pseudo-component
 ########################################################################
@@ -57,29 +57,25 @@ if(${CMAKE_VERSION} VERSION_GREATER_EQUAL "3.16.0")
   set(GR_CMAKE_HAS_PCH ${CMAKE_VERSION})
 endif()
 
-GR_REGISTER_COMPONENT("common-precompiled-headers" ENABLE_COMMON_PCH
-  ENABLE_GNURADIO_RUNTIME
-  GR_CMAKE_HAS_PCH
-  )
+gr_register_component("common-precompiled-headers" ENABLE_COMMON_PCH
+                      ENABLE_GNURADIO_RUNTIME GR_CMAKE_HAS_PCH)
 
 if(ENABLE_COMMON_PCH)
-  add_library(common-precompiled-headers
-    STATIC
-    ${CMAKE_CURRENT_SOURCE_DIR}/lib/dummy.cc
-    )
-  target_include_directories(common-precompiled-headers
-    PUBLIC
-    $<INSTALL_INTERFACE:include>
+    add_library(common-precompiled-headers STATIC
+                ${CMAKE_CURRENT_SOURCE_DIR}/lib/dummy.cc)
+    target_include_directories(
+        common-precompiled-headers
+        PUBLIC $<INSTALL_INTERFACE:include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/include>
     ${Boost_INCLUDE_DIRS}
     )
 
   if(MSVC)
-    target_compile_definitions(common-precompiled-headers PUBLIC
-      # disables stupidity and enables std::min and std::max
-      -DNOMINMAX
-    )
+        target_compile_definitions(
+            common-precompiled-headers
+            PUBLIC # disables stupidity and enables std::min and std::max
+                   -DNOMINMAX)
   endif(MSVC)
 
   target_precompile_headers(
@@ -94,10 +90,8 @@ endif()
 # Register controlport component
 ########################################################################
 
-GR_REGISTER_COMPONENT("gr-ctrlport" ENABLE_GR_CTRLPORT
-  Boost_FOUND
-  ENABLE_GNURADIO_RUNTIME
-)
+gr_register_component("gr-ctrlport" ENABLE_GR_CTRLPORT Boost_FOUND
+                      ENABLE_GNURADIO_RUNTIME)
 
 # find thrift quietly to determine whether it should be enabled by default
 find_package(THRIFT ${GR_THRIFT_MIN_VERSION} QUIET)
@@ -113,24 +107,17 @@ endif()
 ########################################################################
 if(ENABLE_GNURADIO_RUNTIME)
 
-get_filename_component(GR_RUNTIME_PYTHONPATH
-    ${CMAKE_CURRENT_SOURCE_DIR}/python ABSOLUTE
-)
+    get_filename_component(GR_RUNTIME_PYTHONPATH ${CMAKE_CURRENT_SOURCE_DIR}/python
+                           ABSOLUTE)
 
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/gnuradio-runtime.conf.in
-    ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-runtime.conf
-@ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gnuradio-runtime.conf.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-runtime.conf @ONLY)
 
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-runtime.conf
-    DESTINATION ${GR_PREFSDIR}
-)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-runtime.conf
+            DESTINATION ${GR_PREFSDIR})
 
-install(FILES
-    ${CMAKE_CURRENT_SOURCE_DIR}/gr_log_default.conf
-    DESTINATION ${GR_PREFSDIR}
-)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/gr_log_default.conf
+            DESTINATION ${GR_PREFSDIR})
 
 set(PC_ADD_CFLAGS ${MPLIB_PC_ADD_CFLAGS})
 
@@ -150,14 +137,10 @@ endif(ENABLE_PYTHON)
 ########################################################################
 # Create Pkg Config File
 ########################################################################
-configure_file(
-    ${CMAKE_CURRENT_SOURCE_DIR}/gnuradio-runtime.pc.in
-    ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-runtime.pc
-@ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/gnuradio-runtime.pc.in
+                   ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-runtime.pc @ONLY)
 
-install(
-    FILES ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-runtime.pc
-    DESTINATION ${GR_LIBRARY_DIR}/pkgconfig
-)
+    install(FILES ${CMAKE_CURRENT_BINARY_DIR}/gnuradio-runtime.pc
+            DESTINATION ${GR_LIBRARY_DIR}/pkgconfig)
 
 endif(ENABLE_GNURADIO_RUNTIME)

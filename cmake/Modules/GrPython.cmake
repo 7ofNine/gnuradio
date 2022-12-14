@@ -45,8 +45,12 @@ else (CMAKE_CROSSCOMPILING)
 endif(CMAKE_CROSSCOMPILING)
 
 #make the path to the executable appear in the cmake gui
-set(PYTHON_EXECUTABLE ${PYTHON_EXECUTABLE} CACHE FILEPATH "python interpreter")
-set(QA_PYTHON_EXECUTABLE ${QA_PYTHON_EXECUTABLE} CACHE FILEPATH "python interpreter for QA tests")
+set(PYTHON_EXECUTABLE
+    ${PYTHON_EXECUTABLE}
+    CACHE FILEPATH "python interpreter")
+set(QA_PYTHON_EXECUTABLE
+    ${QA_PYTHON_EXECUTABLE}
+    CACHE FILEPATH "python interpreter for QA tests")
 
 add_library(Python::Python INTERFACE IMPORTED)
 # Need to handle special cases where both debug and release
@@ -55,13 +59,13 @@ if(PYTHON_LIBRARY_DEBUG AND PYTHON_LIBRARY_RELEASE)
     message(STATUS "Python Libraries ${PYTHON_LIBRARIES}")
     set_target_properties(Python::Python PROPERTIES
       INTERFACE_INCLUDE_DIRECTORIES "${PYTHON_INCLUDE_DIRS}"
-      INTERFACE_LINK_LIBRARIES "$<$<NOT:$<CONFIG:Debug>>:${PYTHON_LIBRARY_RELEASE}>;$<$<CONFIG:Debug>:${PYTHON_LIBRARY_DEBUG}>"
+            INTERFACE_LINK_LIBRARIES
+            "$<$<NOT:$<CONFIG:Debug>>:${PYTHON_LIBRARY_RELEASE}>;$<$<CONFIG:Debug>:${PYTHON_LIBRARY_DEBUG}>"
       )
 else()
-    set_target_properties(Python::Python PROPERTIES
-      INTERFACE_INCLUDE_DIRECTORIES "${PYTHON_INCLUDE_DIRS}"
-      INTERFACE_LINK_LIBRARIES "${PYTHON_LIBRARIES}"
-      )
+    set_target_properties(
+        Python::Python PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PYTHON_INCLUDE_DIRS}"
+                                  INTERFACE_LINK_LIBRARIES "${PYTHON_LIBRARIES}")
 endif()
 
 # separate target when linking to make an extension module, which should not
@@ -72,47 +76,49 @@ if(WIN32)
     # Need to handle special cases where both debug and release
     # libraries are available (in form of debug;A;optimized;B) in PYTHON_LIBRARIES
     if(PYTHON_LIBRARY_DEBUG AND PYTHON_LIBRARY_RELEASE)
-        set_target_properties(Python::Module PROPERTIES
+        set_target_properties(
+            Python::Module
+            PROPERTIES
           INTERFACE_INCLUDE_DIRECTORIES "${PYTHON_INCLUDE_DIRS}"
-          INTERFACE_LINK_LIBRARIES "$<$<NOT:$<CONFIG:Debug>>:${PYTHON_LIBRARY_RELEASE}>;$<$<CONFIG:Debug>:${PYTHON_LIBRARY_DEBUG}>"
+                INTERFACE_LINK_LIBRARIES
+                "$<$<NOT:$<CONFIG:Debug>>:${PYTHON_LIBRARY_RELEASE}>;$<$<CONFIG:Debug>:${PYTHON_LIBRARY_DEBUG}>"
         )
     else()
-        set_target_properties(Python::Module PROPERTIES
-          INTERFACE_INCLUDE_DIRECTORIES "${PYTHON_INCLUDE_DIRS}"
-          INTERFACE_LINK_LIBRARIES "${PYTHON_LIBRARIES}"
-        )
+        set_target_properties(
+            Python::Module
+            PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${PYTHON_INCLUDE_DIRS}"
+                       INTERFACE_LINK_LIBRARIES "${PYTHON_LIBRARIES}")
     endif()
 else()
-    set_target_properties(Python::Module PROPERTIES
-        INTERFACE_INCLUDE_DIRECTORIES "${PYTHON_INCLUDE_DIRS}"
-    )
+    set_target_properties(Python::Module PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                                    "${PYTHON_INCLUDE_DIRS}")
     if(APPLE)
-        set_target_properties(Python::Module PROPERTIES
-            INTERFACE_LINK_OPTIONS "LINKER:-undefined,dynamic_lookup"
-        )
+        set_target_properties(
+            Python::Module PROPERTIES INTERFACE_LINK_OPTIONS
+                                      "LINKER:-undefined,dynamic_lookup")
     endif(APPLE)
 endif(WIN32)
 
 # Find NumPy but duplicate behavior/variable names of FindPython in CMake 3.14+
 # (to facilitate a future transition)
 execute_process(
-    COMMAND "${PYTHON_EXECUTABLE}" -c
+    COMMAND
+        "${PYTHON_EXECUTABLE}" -c
     "try:\n import numpy\n import os\n inc_path = numpy.get_include()\n if os.path.exists(os.path.join(inc_path, 'numpy', 'arrayobject.h')):\n  print(inc_path, end='')\nexcept:\n pass"
-    OUTPUT_VARIABLE NUMPY_INCLUDE_DIR
-)
+    OUTPUT_VARIABLE NUMPY_INCLUDE_DIR)
 # advanced cache variable that the user should set to override the numpy include dir
-set(Python_NumPy_INCLUDE_DIR ${NUMPY_INCLUDE_DIR} CACHE FILEPATH "NumPy include directory")
+set(Python_NumPy_INCLUDE_DIR
+    ${NUMPY_INCLUDE_DIR}
+    CACHE FILEPATH "NumPy include directory")
 mark_as_advanced(Python_NumPy_INCLUDE_DIR)
 # output used by modern FindPython, duplicate the behavior
 set(Python_NumPy_INCLUDE_DIRS ${Python_NumPy_INCLUDE_DIR})
 
 # target for building with NumPy
 add_library(Python::NumPy INTERFACE IMPORTED)
-set_target_properties(Python::NumPy PROPERTIES
-    INTERFACE_INCLUDE_DIRECTORIES "${Python_NumPy_INCLUDE_DIRS}"
-)
+set_target_properties(Python::NumPy PROPERTIES INTERFACE_INCLUDE_DIRECTORIES
+                                               "${Python_NumPy_INCLUDE_DIRS}")
 target_link_libraries(Python::NumPy INTERFACE Python::Module)
-
 
 ########################################################################
 # Check for the existence of a python module:
@@ -125,8 +131,7 @@ macro(GR_PYTHON_CHECK_MODULE_RAW desc python_code have)
     execute_process(
         COMMAND ${PYTHON_EXECUTABLE} -c "${python_code}"
         OUTPUT_QUIET ERROR_QUIET
-        RESULT_VARIABLE return_code
-    )
+        RESULT_VARIABLE return_code)
     if(return_code EQUAL 0)
         message(STATUS "Python checking for ${desc} - found")
         set(${have} TRUE)
@@ -137,8 +142,9 @@ macro(GR_PYTHON_CHECK_MODULE_RAW desc python_code have)
 endmacro(GR_PYTHON_CHECK_MODULE_RAW)
 
 macro(GR_PYTHON_CHECK_MODULE desc mod cmd have)
-    GR_PYTHON_CHECK_MODULE_RAW(
-        "${desc}" "
+    gr_python_check_module_raw(
+        "${desc}"
+        "
 #########################################
 from packaging.version import Version as LooseVersion
 try:
@@ -157,7 +163,9 @@ endmacro(GR_PYTHON_CHECK_MODULE)
 ########################################################################
 if(NOT DEFINED GR_PYTHON_DIR)
 execute_process(
-    COMMAND ${PYTHON_EXECUTABLE} -c "import os
+        COMMAND
+            ${PYTHON_EXECUTABLE} -c
+            "import os
 import sysconfig
 import site
 
@@ -171,34 +179,32 @@ try:
 except AttributeError: pass
 
 if not install_dir:
-    #find where to install the python module
-    #for Python 3.11+, we could use the 'venv' scheme for all platforms
-    if os.name == 'nt':
+    # Newer Python versions have 'venv' scheme, use for all OSs.
+    if 'venv' in sysconfig.get_scheme_names():
+        scheme = 'venv'
+    elif os.name == 'nt':
         scheme = 'nt'
     else:
         scheme = 'posix_prefix'
-    install_dir = sysconfig.get_path('platlib', scheme)
-    prefix = sysconfig.get_path('data')
-
-#strip the prefix to return a relative path
+    install_dir = sysconfig.get_path('platlib', scheme=scheme, vars={'base': prefix, 'platbase': prefix})
 print(os.path.relpath(install_dir, prefix))"
     OUTPUT_STRIP_TRAILING_WHITESPACE
-    OUTPUT_VARIABLE GR_PYTHON_DIR
-)
+        OUTPUT_VARIABLE GR_PYTHON_DIR)
 endif()
 file(TO_CMAKE_PATH ${GR_PYTHON_DIR} GR_PYTHON_DIR)
-
 
 ########################################################################
 # Create an always-built target with a unique name
 # Usage: GR_UNIQUE_TARGET(<description> <dependencies list>)
 ########################################################################
 function(GR_UNIQUE_TARGET desc)
-    file(RELATIVE_PATH reldir ${CMAKE_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
-    execute_process(COMMAND ${PYTHON_EXECUTABLE} -c "import re, hashlib
+    file(RELATIVE_PATH reldir ${PROJECT_BINARY_DIR} ${CMAKE_CURRENT_BINARY_DIR})
+    execute_process(
+        COMMAND ${PYTHON_EXECUTABLE} -c "import re, hashlib
 unique = hashlib.md5(b'${reldir}${ARGN}').hexdigest()[:5]
 print(re.sub('\\W', '_', r'${desc} ${reldir} ' + unique))"
-    OUTPUT_VARIABLE _target OUTPUT_STRIP_TRAILING_WHITESPACE)
+        OUTPUT_VARIABLE _target
+        OUTPUT_STRIP_TRAILING_WHITESPACE)
     add_custom_target(${_target} ALL DEPENDS ${ARGN})
 endfunction(GR_UNIQUE_TARGET)
 
@@ -207,7 +213,8 @@ endfunction(GR_UNIQUE_TARGET)
 ########################################################################
 function(GR_PYTHON_INSTALL)
     include(CMakeParseArgumentsCopy)
-    CMAKE_PARSE_ARGUMENTS(GR_PYTHON_INSTALL "" "DESTINATION" "FILES;PROGRAMS;DIRECTORY;DEPENDS" ${ARGN})
+    cmake_parse_arguments(GR_PYTHON_INSTALL "" "DESTINATION"
+                          "FILES;PROGRAMS;DIRECTORY;DEPENDS" ${ARGN})
 
     ####################################################################
     if(GR_PYTHON_INSTALL_FILES)
@@ -215,8 +222,7 @@ function(GR_PYTHON_INSTALL)
     install(
       FILES ${GR_PYTHON_INSTALL_FILES}
       DESTINATION ${GR_PYTHON_INSTALL_DESTINATION}
-      ${GR_PYTHON_INSTALL_UNPARSED_ARGUMENTS}
-    )
+            ${GR_PYTHON_INSTALL_UNPARSED_ARGUMENTS})
 
         #create a list of all generated files
         unset(pysrcfiles)
@@ -251,24 +257,25 @@ function(GR_PYTHON_INSTALL)
           set(GR_PYTHON_INSTALL_DEPENDS ${pysrcfiles})
         endif()
 
-
         #the command to generate the pyc files
         add_custom_command(
-            DEPENDS ${GR_PYTHON_INSTALL_DEPENDS} OUTPUT ${pycfiles}
-            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/python_compile_helper.py ${pysrcfiles} ${pycfiles}
-        )
+            DEPENDS ${GR_PYTHON_INSTALL_DEPENDS}
+            OUTPUT ${pycfiles}
+            COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/python_compile_helper.py
+                    ${pysrcfiles} ${pycfiles})
 
         #the command to generate the pyo files
         add_custom_command(
-            DEPENDS ${pysrcfiles} OUTPUT ${pyofiles}
-            COMMAND ${PYTHON_EXECUTABLE} -O ${CMAKE_BINARY_DIR}/python_compile_helper.py ${pysrcfiles} ${pyofiles}
-        )
+            DEPENDS ${pysrcfiles}
+            OUTPUT ${pyofiles}
+            COMMAND
+                ${PYTHON_EXECUTABLE} -O ${PROJECT_BINARY_DIR}/python_compile_helper.py
+                ${pysrcfiles} ${pyofiles})
 
         #create install rule and add generated files to target list
         set(python_install_gen_targets ${pycfiles} ${pyofiles})
         install(FILES ${python_install_gen_targets}
-            DESTINATION ${GR_PYTHON_INSTALL_DESTINATION}
-        )
+                DESTINATION ${GR_PYTHON_INSTALL_DESTINATION})
 
     ####################################################################
     elseif(GR_PYTHON_INSTALL_DIRECTORY)
@@ -276,9 +283,7 @@ function(GR_PYTHON_INSTALL)
     install(
       DIRECTORY ${GR_PYTHON_INSTALL_DIRECTORY}
       DESTINATION ${GR_PYTHON_INSTALL_DESTINATION}
-      ${GR_PYTHON_INSTALL_UNPARSED_ARGUMENTS}
-    )
-
+            ${GR_PYTHON_INSTALL_UNPARSED_ARGUMENTS})
 
         # collect all python files in given directories
         # #############################################
@@ -319,13 +324,16 @@ function(GR_PYTHON_INSTALL)
         # generate the py[oc] files
         # #########################
         add_custom_command(
-            DEPENDS ${pysrcfiles} OUTPUT ${pycfiles}
-            COMMAND ${PYTHON_EXECUTABLE} ${CMAKE_BINARY_DIR}/python_compile_helper.py ${pysrcfiles} ${pycfiles}
-        )
+            DEPENDS ${pysrcfiles}
+            OUTPUT ${pycfiles}
+            COMMAND ${PYTHON_EXECUTABLE} ${PROJECT_BINARY_DIR}/python_compile_helper.py
+                    ${pysrcfiles} ${pycfiles})
         add_custom_command(
-            DEPENDS ${pysrcfiles} OUTPUT ${pyofiles}
-            COMMAND ${PYTHON_EXECUTABLE} -O ${CMAKE_BINARY_DIR}/python_compile_helper.py ${pysrcfiles} ${pyofiles}
-        )
+            DEPENDS ${pysrcfiles}
+            OUTPUT ${pyofiles}
+            COMMAND
+                ${PYTHON_EXECUTABLE} -O ${PROJECT_BINARY_DIR}/python_compile_helper.py
+                ${pysrcfiles} ${pyofiles})
         set(python_install_gen_targets ${pycfiles} ${pyofiles})
 
         # per-directory install rules
@@ -341,12 +349,11 @@ function(GR_PYTHON_INSTALL)
             endforeach(pyget_target)
 
             # install relative to current binary dir
-            file(RELATIVE_PATH pygen_path_rel "${CMAKE_CURRENT_BINARY_DIR}" "${pygen_path}")
+            file(RELATIVE_PATH pygen_path_rel "${CMAKE_CURRENT_BINARY_DIR}"
+                 "${pygen_path}")
             list(SORT pygen_path_targets)
-            install(
-                FILES ${pygen_path_targets}
-                DESTINATION "${GR_PYTHON_INSTALL_DESTINATION}/${pygen_path_rel}"
-            )
+            install(FILES ${pygen_path_targets}
+                    DESTINATION "${GR_PYTHON_INSTALL_DESTINATION}/${pygen_path_rel}")
         endforeach(pygen_path)
 
     ####################################################################
@@ -361,19 +368,21 @@ function(GR_PYTHON_INSTALL)
         foreach(pyfile ${GR_PYTHON_INSTALL_PROGRAMS})
             get_filename_component(pyfile_name ${pyfile} NAME)
             get_filename_component(pyfile ${pyfile} ABSOLUTE)
-            string(REPLACE "${CMAKE_SOURCE_DIR}" "${CMAKE_BINARY_DIR}" pyexefile "${pyfile}.exe")
+            string(REPLACE "${PROJECT_SOURCE_DIR}" "${PROJECT_BINARY_DIR}" pyexefile
+                           "${pyfile}.exe")
             list(APPEND python_install_gen_targets ${pyexefile})
 
             get_filename_component(pyexefile_path ${pyexefile} PATH)
             file(MAKE_DIRECTORY ${pyexefile_path})
 
             add_custom_command(
-                OUTPUT ${pyexefile} DEPENDS ${pyfile}
-                COMMAND ${PYTHON_EXECUTABLE} -c
+                OUTPUT ${pyexefile}
+                DEPENDS ${pyfile}
+                COMMAND
+                    ${PYTHON_EXECUTABLE} -c
                 "import re; R=re.compile('^\#!.*$\\n',flags=re.MULTILINE); open(r'${pyexefile}','w').write(r'\#!${pyexe_native}'+'\\n'+R.sub('',open(r'${pyfile}','r').read()))"
                 COMMENT "Shebangin ${pyfile_name}"
-                VERBATIM
-            )
+                VERBATIM)
 
             #on windows, python files need an extension to execute
             get_filename_component(pyfile_ext ${pyfile} EXT)
@@ -381,22 +390,25 @@ function(GR_PYTHON_INSTALL)
                 set(pyfile_name "${pyfile_name}.py")
             endif()
 
-            install(PROGRAMS ${pyexefile} RENAME ${pyfile_name}
+            install(
+                PROGRAMS ${pyexefile}
+                RENAME ${pyfile_name}
                 DESTINATION ${GR_PYTHON_INSTALL_DESTINATION}
-                ${GR_PYTHON_INSTALL_UNPARSED_ARGUMENTS}
-            )
+                ${GR_PYTHON_INSTALL_UNPARSED_ARGUMENTS})
         endforeach(pyfile)
 
     endif()
 
-    GR_UNIQUE_TARGET("pygen" ${python_install_gen_targets})
+    gr_unique_target("pygen" ${python_install_gen_targets})
 
 endfunction(GR_PYTHON_INSTALL)
 
 ########################################################################
 # Write the python helper script that generates byte code files
 ########################################################################
-file(WRITE ${CMAKE_BINARY_DIR}/python_compile_helper.py "
+file(
+    WRITE ${PROJECT_BINARY_DIR}/python_compile_helper.py
+    "
 import sys, py_compile
 files = sys.argv[1:]
 srcs, gens = files[:len(files)//2], files[len(files)//2:]

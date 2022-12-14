@@ -14,17 +14,16 @@ set(__INCLUDED_GR_BOOST_CMAKE TRUE)
 # Setup Boost and handle some system specific things
 ########################################################################
 
-set(BOOST_REQUIRED_COMPONENTS
-    date_time
-    program_options
-    system
-    regex
-    thread
-)
+set(BOOST_REQUIRED_COMPONENTS date_time program_options system regex thread)
 
-if(UNIX AND NOT BOOST_ROOT AND EXISTS "/usr/lib64")
+if(UNIX
+   AND NOT BOOST_ROOT
+   AND EXISTS "/usr/lib64")
     list(APPEND BOOST_LIBRARYDIR "/usr/lib64") #fedora 64-bit fix
-endif(UNIX AND NOT BOOST_ROOT AND EXISTS "/usr/lib64")
+endif(
+    UNIX
+    AND NOT BOOST_ROOT
+    AND EXISTS "/usr/lib64")
 
 if(WIN32)
     #The following libraries are either used indirectly,
@@ -37,17 +36,16 @@ if(WIN32)
     #these libraries should be listed in the main components
     #list once the minimum version of boost had been bumped
     #to a version which always contains these components.
-    list(APPEND BOOST_REQUIRED_COMPONENTS
-        atomic
-        chrono
-    )
+    list(APPEND BOOST_REQUIRED_COMPONENTS atomic chrono)
 endif(WIN32)
 
 if(MSVC)
     if (NOT DEFINED BOOST_ALL_DYN_LINK)
         set(BOOST_ALL_DYN_LINK TRUE)
     endif()
-    set(BOOST_ALL_DYN_LINK "${BOOST_ALL_DYN_LINK}" CACHE BOOL "boost enable dynamic linking")
+    set(BOOST_ALL_DYN_LINK
+        "${BOOST_ALL_DYN_LINK}"
+        CACHE BOOL "boost enable dynamic linking")
     if(BOOST_ALL_DYN_LINK)
         add_definitions(-DBOOST_ALL_DYN_LINK) #setup boost auto-linking in msvc
     else(BOOST_ALL_DYN_LINK)
@@ -93,9 +91,9 @@ find_package(
 # Boost 1.52 disabled, see https://svn.boost.org/trac/boost/ticket/7669
 # Similar problems with Boost 1.46 and 1.47.
 
-OPTION(ENABLE_BAD_BOOST "Enable known bad versions of Boost" OFF)
+option(ENABLE_BAD_BOOST "Enable known bad versions of Boost" OFF)
 if(ENABLE_BAD_BOOST)
-  MESSAGE(STATUS "Enabling use of known bad versions of Boost.")
+    message(STATUS "Enabling use of known bad versions of Boost.")
 endif(ENABLE_BAD_BOOST)
 
 # For any unsuitable Boost version, add the version number below in
@@ -104,17 +102,21 @@ endif(ENABLE_BAD_BOOST)
 #     XX is the major version ('10' for version 1)
 #     YY is the minor version number ('46' for 1.46)
 #     ZZ is the patcher version number (typically just '00')
-set(Boost_NOGO_VERSIONS
-  104600 104601 104700 105200
-  )
+set(Boost_NOGO_VERSIONS 104600 104601 104700 105200)
 
 foreach(ver ${Boost_NOGO_VERSIONS})
   if("${Boost_VERSION}" STREQUAL "${ver}")
     if(NOT ENABLE_BAD_BOOST)
-      MESSAGE(STATUS "WARNING: Found a known bad version of Boost (v${Boost_VERSION}). Disabling.")
+            message(
+                STATUS
+                    "WARNING: Found a known bad version of Boost (v${Boost_VERSION}). Disabling."
+            )
       set(Boost_FOUND FALSE)
     else(NOT ENABLE_BAD_BOOST)
-      MESSAGE(STATUS "WARNING: Found a known bad version of Boost (v${Boost_VERSION}). Continuing anyway.")
+            message(
+                STATUS
+                    "WARNING: Found a known bad version of Boost (v${Boost_VERSION}). Continuing anyway."
+            )
       set(Boost_FOUND TRUE)
     endif(NOT ENABLE_BAD_BOOST)
   endif("${Boost_VERSION}" STREQUAL "${ver}")

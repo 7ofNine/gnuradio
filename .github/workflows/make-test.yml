@@ -26,7 +26,7 @@ jobs:
     - uses: actions/checkout@v2
     - uses: quentinguidee/pep8-action@v1
       with:
-        arguments: '--max-line-length=120 --ignore E265,E266,E402,E501,E704,E712,E713,E714,E711,E722,E741,W504,W605 --exclude *.yml.py'
+        arguments: '--max-line-length=120 --ignore E265,E266,E275,E402,E501,E704,E712,E713,E714,E711,E722,E741,W504,W605 --exclude *.yml.py'
   # Doxygen gets built separately. It has a lot of output and its own weirdness.
   doxygen:
     name: Doxygen
@@ -63,6 +63,11 @@ jobs:
             containerid: 'gnuradio/ci:ubuntu-20.04-3.9'
             cxxflags: -Werror -Wno-error=invalid-pch
             ctest_args: '-E "qa_cpp_py_binding|qa_cpp_py_binding_set|qa_ctrlport_probes|qa_qtgui|metainfo_test"'
+            ldpath:
+          - distro: 'Ubuntu 22.04'
+            containerid: 'gnuradio/ci:ubuntu-22.04-3.9'
+            cxxflags: -Werror -Wno-error=invalid-pch
+            ctest_args: '-E "qa_cpp_py_binding|qa_cpp_py_binding_set|qa_ctrlport_probes|qa_qtgui|qa_polar_..coder_(sc_)?systematic"'
             ldpath:
           - distro: 'Fedora 35'
             containerid: 'gnuradio/ci:fedora-35-3.9'
