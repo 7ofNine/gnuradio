@@ -111,9 +111,6 @@ asserts:
 
 templates:
     imports: |-
-        from PyQt5 import Qt
-        from gnuradio import qtgui
-        from gnuradio.filter import firdes
         import sip
     callbacks:
     - set_frequency_range(${fc}, ${bw})
@@ -142,7 +139,7 @@ templates:
 
 
 cpp_templates:
-  includes: ['#include <gnuradio/qtgui/${type.fcn}.h>', '#include <gnuradio/filter/firdes.h>']
+  includes: ['#include <gnuradio/qtgui/${type.fcn}.h>']
   declarations: gr::qtgui::${type.fcn}::sptr ${id};
   make: |-
     <%
