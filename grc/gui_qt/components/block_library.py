@@ -83,6 +83,7 @@ class LibraryView(QtWidgets.QTreeView):
         else:
             self.expand(self.currentIndex())
 
+
 class BlockLibrary(QtWidgets.QDockWidget, base.Component):
 
     def __init__(self):
