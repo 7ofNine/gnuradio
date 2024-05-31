@@ -502,7 +502,7 @@ from gnuradio import gr, gr_unittest
 % if lang == 'cpp':
 try:
 % if version in ['310']:
-  from gnuradio.${modname} import ${blockname}
+    from gnuradio.${modname} import ${blockname}
 % else:
     from ${modname} import ${blockname}
 % endif
@@ -566,7 +566,7 @@ templates:
 #     * default
 parameters:
 - id: parametername_replace_me
-  label: FIX ME:
+  label: FIX ME
   dtype: string
   default: You need to fill in your grc/${modname}_${blockname}.block.yaml
 #- id: ...

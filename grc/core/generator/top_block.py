@@ -184,6 +184,13 @@ class TopBlockGenerator(object):
         return output
 
     def _blocks(self):
+        """
+        Returns a list of tuples: (block, block_make)
+
+        'block' contains a reference to the block object.
+        'block_make' contains the pre-rendered string for the 'make' part of the
+        block.
+        """
         fg = self._flow_graph
         parameters = fg.get_parameters()
 
@@ -319,14 +326,16 @@ class TopBlockGenerator(object):
             template = templates[con.type]
             if con.source_port.dtype != 'bus':
                 code = template.render(
-                    make_port_sig=make_port_sig, source=con.source_port, sink=con.sink_port)
+                    make_port_sig=make_port_sig,
+                    source=con.source_port,
+                    sink=con.sink_port,
+                    **con.namespace_templates)
                 rendered.append(code)
             else:
                 # Bus ports need to iterate over the underlying connections and then render
                 # the code for each subconnection
                 porta = con.source_port
                 portb = con.sink_port
-                fg = self._flow_graph
 
                 if porta.dtype == 'bus' and portb.dtype == 'bus':
                     # which bus port is this relative to the bus structure
@@ -334,10 +343,11 @@ class TopBlockGenerator(object):
                         for port_num_a, port_num_b in zip(porta.bus_structure, portb.bus_structure):
                             hidden_porta = porta.parent.sources[port_num_a]
                             hidden_portb = portb.parent.sinks[port_num_b]
-                            connection = fg.parent_platform.Connection(
-                                parent=self, source=hidden_porta, sink=hidden_portb)
                             code = template.render(
-                                make_port_sig=make_port_sig, source=hidden_porta, sink=hidden_portb)
+                                make_port_sig=make_port_sig,
+                                source=hidden_porta,
+                                sink=hidden_portb,
+                                **con.namespace_templates)
                             rendered.append(code)
 
         return rendered

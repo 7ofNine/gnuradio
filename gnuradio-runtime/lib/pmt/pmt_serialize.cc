@@ -15,6 +15,7 @@
 #include "pmt/pmt_serial_tags.h"
 #include "pmt_int.h"
 #include <pmt/pmt.h>
+#include <cstdint>
 #include <limits>
 #include <vector>
 
@@ -98,7 +99,7 @@ static bool serialize_untagged_u64(uint64_t i, std::streambuf& sb)
 static bool
 serialize_untagged_u8_array(const uint8_t* data, size_t length, std::streambuf& sb)
 {
-    return sb.sputn((char*)data, length) != std::streambuf::traits_type::eof();
+    return sb.sputn((const char*)data, length) != std::streambuf::traits_type::eof();
 }
 
 static bool
@@ -108,7 +109,7 @@ serialize_untagged_u16_array(const uint16_t* data, size_t length, std::streambuf
     for (size_t i = 0; i < length; i++) {
         native_to_big_u16(data[i], &bedata[sizeof(uint16_t) * i]);
     }
-    return sb.sputn((char*)&bedata[0], length * sizeof(uint16_t)) !=
+    return sb.sputn((const char*)&bedata[0], length * sizeof(uint16_t)) !=
            std::streambuf::traits_type::eof();
 }
 
@@ -119,7 +120,7 @@ serialize_untagged_u32_array(const uint32_t* data, size_t length, std::streambuf
     for (size_t i = 0; i < length; i++) {
         native_to_big_u32(data[i], &bedata[sizeof(uint32_t) * i]);
     }
-    return sb.sputn((char*)&bedata[0], length * sizeof(uint32_t)) !=
+    return sb.sputn((const char*)&bedata[0], length * sizeof(uint32_t)) !=
            std::streambuf::traits_type::eof();
 }
 
@@ -130,7 +131,7 @@ serialize_untagged_u64_array(const uint64_t* data, size_t length, std::streambuf
     for (size_t i = 0; i < length; i++) {
         native_to_big_u64(data[i], &bedata[sizeof(uint64_t) * i]);
     }
-    return sb.sputn((char*)&bedata[0], length * sizeof(uint64_t)) !=
+    return sb.sputn((const char*)&bedata[0], length * sizeof(uint64_t)) !=
            std::streambuf::traits_type::eof();
 }
 
@@ -414,7 +415,7 @@ tail_recursion:
                 ok &= serialize_untagged_u8(0, sb);
             }
             ok &= serialize_untagged_u8_array(
-                (uint8_t*)&s8vector_elements(obj)[0], vec_len, sb);
+                (const uint8_t*)&s8vector_elements(obj)[0], vec_len, sb);
 
             return ok;
         }
@@ -440,7 +441,7 @@ tail_recursion:
                 ok &= serialize_untagged_u8(0, sb);
             }
             ok &= serialize_untagged_u16_array(
-                (uint16_t*)&s16vector_elements(obj)[0], vec_len, sb);
+                (const uint16_t*)&s16vector_elements(obj)[0], vec_len, sb);
             return ok;
         }
 
@@ -465,7 +466,7 @@ tail_recursion:
                 ok &= serialize_untagged_u8(0, sb);
             }
             ok &= serialize_untagged_u32_array(
-                (uint32_t*)&s32vector_elements(obj)[0], vec_len, sb);
+                (const uint32_t*)&s32vector_elements(obj)[0], vec_len, sb);
             return ok;
         }
 
@@ -490,7 +491,7 @@ tail_recursion:
                 ok &= serialize_untagged_u8(0, sb);
             }
             ok &= serialize_untagged_u64_array(
-                (uint64_t*)&s64vector_elements(obj)[0], vec_len, sb);
+                (const uint64_t*)&s64vector_elements(obj)[0], vec_len, sb);
             return ok;
         }
 
@@ -503,7 +504,7 @@ tail_recursion:
                 ok &= serialize_untagged_u8(0, sb);
             }
             ok &= serialize_untagged_u32_array(
-                (uint32_t*)&f32vector_elements(obj)[0], vec_len, sb);
+                (const uint32_t*)&f32vector_elements(obj)[0], vec_len, sb);
             return ok;
         }
 
@@ -516,7 +517,7 @@ tail_recursion:
                 ok &= serialize_untagged_u8(0, sb);
             }
             ok &= serialize_untagged_u64_array(
-                (uint64_t*)&f64vector_elements(obj)[0], vec_len, sb);
+                (const uint64_t*)&f64vector_elements(obj)[0], vec_len, sb);
             return ok;
         }
 
@@ -529,7 +530,7 @@ tail_recursion:
                 ok &= serialize_untagged_u8(0, sb);
             }
             ok &= serialize_untagged_u32_array(
-                (uint32_t*)&c32vector_elements(obj)[0], vec_len * 2, sb);
+                (const uint32_t*)&c32vector_elements(obj)[0], vec_len * 2, sb);
             return ok;
         }
 
@@ -543,7 +544,7 @@ tail_recursion:
             }
             // No known portable 128 bit swap function, so double the length
             ok &= serialize_untagged_u64_array(
-                (uint64_t*)&c64vector_elements(obj)[0], vec_len * 2, sb);
+                (const uint64_t*)&c64vector_elements(obj)[0], vec_len * 2, sb);
             return ok;
         }
     }
